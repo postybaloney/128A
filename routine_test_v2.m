@@ -28,7 +28,7 @@ for j = 1:ntest
     % PUT YOUR FUNCTION NAME BELOW e.g.
     % [root, info] = modifiedzeroin31415926535(func, Int, params)
     %%%%
-    [root, info] = modifiedzeroin3037680414_v2(func, Int, params);
+    [root, info] = modifiedzeroin3037680414(func, Int, params);
     profile off
     % Verify root
     root_tol_check = abs(root - fzero(func, root)) < params.root_tol;
