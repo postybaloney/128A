@@ -2,6 +2,7 @@
 clc; clear;
 % approximate n_bisec based on the length of interval
 appx_bisec = false;
+
 func1 = @(x) x*exp(-x) - 2*x + 1; Int1.a = 0; Int1.b = 3;
 func2 = @(x) x*cos(x) - 2*x^2 + 3*x - 1; Int2.a = 1; Int2.b = 3;
 func3 = @(x) x^3-7*x^2+14*x-6; Int3.a = 0; Int3.b = 1;
@@ -43,24 +44,24 @@ for j = 1:ntest
     end
     % check # of function calls
     p = profile('info');
-    foo = {p.FunctionTable.CompleteName};
+    % Find the number of function calls from the profiling data
+    if isfield(p.FunctionTable, 'FunctionName')
+        foo = {p.FunctionTable.FunctionName};
+    else
+        foo = {p.FunctionTable.CompleteName};
+    end
+    % foo = {p.FunctionTable.CompleteName};
     bar = strfind(foo, func2str(func));
-    bar2 = strfind(foo, vectorize(func));
     fcall_idx = find(~cellfun(@isempty, bar));
-    fcall_idx2 = find(~cellfun(@isempty, bar2));
     num_fcall = p.FunctionTable(fcall_idx).NumCalls;
-    num_fcall2 = 0;
-    % num_fcall2 = p.FunctionTable(fcall_idx2).NumCalls;
-
+    %%
     % compute score_eff
     if appx_bisec
         n_bisec = ceil(log2((Int.b-Int.a)/params.root_tol))+2;
     else
         n_bisec = test_bisec{j};
     end
-
     buffer = 10;
-
     n_ideal = test_it{j};
     n_upper = max(n_bisec, 2*n_ideal) + buffer;
     n_lower = n_ideal + buffer;
@@ -80,7 +81,6 @@ for j = 1:ntest
         fprintf("Test function %d : Failed with %d calls !! \n", ...
         j, num_fcall);
         score_tot(j) = 0;
-        % score_tot(j) = score_acc(j) + score_eff(j) + score_extra(j);
         fprintf("acc : %.2f \t eff : %.2f \t extra : %.2f \t tot : %.2f \n", ...
         score_acc(j), score_eff(j), score_extra(j), score_tot(j));
     end
@@ -89,4 +89,3 @@ end
 final_score = sum(score_tot) / ntest;
 disp("#####")
 fprintf('Final score : %f \n', final_score);
-
