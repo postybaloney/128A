@@ -31,7 +31,8 @@ function [root, info] = modifiedzeroin3037680414(func, Int, params)
                 x2 = x2_change;
                 tot_calls = tot_calls + IQI_calls;
                 IQI_iters = IQI_iters + 1;
-            elseif f1*f2 < 0
+            end
+            if f1*f2 < 0
                 [x3, IQI_calls, f0, f1, f2, x0_change, x1_change, x2_change] = IQI(func, [x1, x2, x3]);
                 tot_calls = tot_calls + IQI_calls;
                 IQI_iters = IQI_iters + 1;
@@ -69,6 +70,7 @@ function [root, info] = modifiedzeroin3037680414(func, Int, params)
                 x0 = anew;
                 x1 = bnew;
                 x2 = (x0 + x1)/2;
+                x3 = x2/2;
                 tot_calls = tot_calls + Bi_calls;
             end
             if IQI_iters >= 4

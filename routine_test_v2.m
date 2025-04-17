@@ -80,6 +80,7 @@ for j = 1:ntest
         fprintf("Test function %d : Failed with %d calls !! \n", ...
         j, num_fcall);
         score_tot(j) = 0;
+        % score_tot(j) = score_acc(j) + score_eff(j) + score_extra(j);
         fprintf("acc : %.2f \t eff : %.2f \t extra : %.2f \t tot : %.2f \n", ...
         score_acc(j), score_eff(j), score_extra(j), score_tot(j));
     end
