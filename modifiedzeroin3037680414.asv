@@ -13,11 +13,14 @@ function [root, info] = modifiedzeroin3037680414(func, Int, params)
             f3 = abs(func(x3));
             tot_calls = tot_calls + 1;
         end
-        if abs((x2-x0)/x0) < params.root_tol || (~firstTime && f3 < params.func_tol)
-            tot_calls = tot_calls + 1;
+        if ((10^(3))*abs(x1-x0) < params.root_tol) || (~firstTime && f3 < params.func_tol)
             root = x3;
             info.flag = 0;
             info.calls = tot_calls;
+            info.x0 = x0;
+            info.x1 = x1;
+            info.x2 = x2;
+            info.f3 = f3;
             break;
         end
         if ~firstTime
@@ -32,7 +35,7 @@ function [root, info] = modifiedzeroin3037680414(func, Int, params)
                 [x3, IQI_calls, f0, f1, f2, x0_change, x1_change, x2_change] = IQI(func, [x1, x2, x3]);
                 tot_calls = tot_calls + IQI_calls;
                 IQI_iters = IQI_iters + 1;
-                x0 = x0_change;
+                x0 = min(x0_change;
                 x1 = x1_change;
                 x2 = x2_change;
             else
@@ -60,41 +63,13 @@ function [root, info] = modifiedzeroin3037680414(func, Int, params)
             x1 = x1_change;
             x2 = x2_change;
         end
-        if (x3 < x0 || x3 > x1) || (IQI_iters >= 4) || (f0*f2 >= 0 && f2*f1 >= 0)
-            disp([x0 x1 x2 x3])
-            disp([f0 f1 f2])
-            if (x3 < x0 || x3 > x1)
-                if x3 < x0
-                    [anew, bnew, Bi_calls] = oneStepSecant(func, x3, x1);
-                    tot_calls = tot_calls + Bi_calls;
-                    x0 = anew;
-                    x1 = bnew;
-                    x2 = (x0+x1)/2;
-                else
-                    [anew, bnew, Bi_calls] = oneStepSecant(func, x0, x3);
-                    tot_calls = tot_calls + Bi_calls;
-                    x0 = anew;
-                    x1 
-            if (f0*f2 >= 0)
-                [anew, bnew, Bi_calls] = oneStepSecant(func, x0, x2);
-                tot_calls = tot_calls + Bi_calls;
+        if (x3 < min([x0, x1, x2]) || x3 > max([x0, x1, x2])) || (IQI_iters >= 4) || (f0*f2 >= 0 && f2*f1 >= 0)
+            if (x3 < min([x0, x1, x2]) || x3 > max([x0, x1, x2])) || (f0*f2 >= 0 && f2*f1 >= 0)
+                [anew, bnew, Bi_calls] = oneStepBisection(func, x0, x1);
                 x0 = anew;
                 x1 = bnew;
-                x2 = (x0+x1)/2;
-            elseif (f2*f1 >= 0)
-                [anew, bnew, Bi_calls] = oneStepSecant(func, x1, x2);
+                x2 = (x0 + x1)/2;
                 tot_calls = tot_calls + Bi_calls;
-                disp([x0 anew])
-                disp([x1 bnew])
-                x0 = anew;
-                x1 = bnew;
-                x2 = (x0+x1)/2;
-            else
-                [anew, bnew, Bi_calls] = oneStepSecant(func, x0, x1);
-                tot_calls = tot_calls + Bi_calls;
-                x0 = anew;
-                x1 = bnew;
-                x2 = (x1+x0)/2;
             end
             if IQI_iters >= 4
                 IQI_iters = 0;
@@ -106,7 +81,7 @@ function [root, info] = modifiedzeroin3037680414(func, Int, params)
     %     info.flag = 0;
     %     info.calls = tot_calls;
     % end
-    % if tot_calls > 31
+    % if tot_calls > 100
     %     root = x3;
     %     info.flag = 1;
     %     info.calls = tot_calls;
@@ -125,24 +100,29 @@ function [x3, calls, f0, f1, f2, x0, x1, x2] = IQI(func, x)
     % f0 = func(x0);
     % f1 = func(x1);
     % f2 = func(x2);
-    x3 = (f1.*f2).*x0/((f0-f1).*(f0-f2)) + (f0.*f2).*x1/((f1-f0).*(f1-f2)) + (f0.*f1).*x2/((f2-f0).*(f2-f1));
-    calls = 3;
+    if any([f0==f1, f0==f2, f1==f2])
+        x3 = (x0 + x1 + x2)/3; % fallback to midpoint if values collapse
+        calls = 3;
+    else
+        x3 = (f1.*f2).*x0/((f0-f1).*(f0-f2)) + (f0.*f2).*x1/((f1-f0).*(f1-f2)) + (f0.*f1).*x2/((f2-f0).*(f2-f1));
+        calls = 3;
+    end
 end
 
-% function [anew, bnew, calls] = oneStepBisection(func, a, b)
-%     p = (a + b)/2;
-%     val_eval = str2func(vectorize(func));
-%     vals = val_eval([a, p]);
-%     % vals = [func(a), func(p)];
-%     if vals(1)*vals(2) > 0
-%         anew = p;
-%         bnew = b;
-%     else
-%         anew = a;
-%         bnew = p;
-%     end
-%     calls = 2;
-% end
+function [anew, bnew, calls] = oneStepBisection(func, a, b)
+    p = (a + b)/2;
+    val_eval = str2func(vectorize(func));
+    vals = val_eval([a, p]);
+    % vals = [func(a), func(p)];
+    if vals(1)*vals(2) > 0
+        anew = p;
+        bnew = b;
+    else
+        anew = a;
+        bnew = p;
+    end
+    calls = 2;
+end
 
 function [anew, bnew, calls] = oneStepSecant(func, a, b)
     val_eval = str2func(vectorize(func));

@@ -13,7 +13,7 @@ test_functions = {func1, func2, func3, func4, func5, func6, func7};
 test_intervals = {Int1, Int2, Int3, Int4, Int5, Int6, Int7};
 
 params.root_tol = 1e-7; params.func_tol = 1e-7;
-for j = 5:7
+for j = 1:7
     func = test_functions{j}; Int = test_intervals{j};
     disp("#####")
     profile on
@@ -29,11 +29,11 @@ for j = 5:7
     if (root_tol_check || func_tol_check) && int_check
         fprintf("CORRECT for test function %d !! \n", j);
     else
-        disp(root)
-        disp(root_tol_check)
-        disp(func_tol_check)
-        disp(int_check)
-        fprintf("FAILED for test function%d !! \n", j);
+        % disp(root)
+        % disp(root_tol_check)
+        % disp(func_tol_check)
+        % disp(int_check)
+        fprintf("FAILED for test function %d !! \n", j);
     end
     p = profile('info');
     foo = {p.FunctionTable.CompleteName};
@@ -42,7 +42,8 @@ for j = 5:7
     fcall_idx = find(~cellfun(@isempty, bar));
     fcall_idx2 = find(~cellfun(@isempty, bar2));
     num_fcall = p.FunctionTable(fcall_idx).NumCalls;
-    num_fcall2 = p.FunctionTable(fcall_idx2).NumCalls;
+    num_fcall2 = 0;
+    % num_fcall2 = p.FunctionTable(fcall_idx2).NumCalls;
     
     fprintf("It takes %d %d function calls !! \n", num_fcall, num_fcall2);
 end
