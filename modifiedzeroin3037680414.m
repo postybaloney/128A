@@ -52,14 +52,6 @@ function [root, info] = modifiedzeroin3037680414(func, Int, params)
                  x1 = x1_change;
                  x2 = x2_change;
              end
-             % if (f0*f2 >= 0 && f2*f1 >= 0)
-             %     disp(f0*f2)
-             %     disp(f2*f1)
-             %     root = x3;
-             %     info.flag = 0;
-             %     info.calls = tot_calls;
-             %     break;
-             % end
          else
              [x3, IQI_calls, f0, f1, f2, x0_change, x1_change, x2_change] = IQI(func, [x0, x1, x2]);
              tot_calls = tot_calls + IQI_calls;
@@ -83,16 +75,6 @@ function [root, info] = modifiedzeroin3037680414(func, Int, params)
              end
          end
      end
-     % if tot_calls == 30
-     %     root = x3;
-     %     info.flag = 0;
-     %     info.calls = tot_calls;
-     % end
-     % if tot_calls > 100
-     %     root = x3;
-     %     info.flag = 1;
-     %     info.calls = tot_calls;
-     % end
  end
 
 function [x3, calls, f0, f1, f2, x0, x1, x2] = IQI(func, x)
@@ -132,13 +114,10 @@ function [anew, bnew, calls] = oneStepBisection(func, a, b)
 end
 
 function [anew, bnew, calls] = oneStepSecant(func, a, b)
-
     val_eval = str2func(vectorize(func));
     vals = val_eval([a, b]);
     q0 = vals(1);
     q1 = vals(2);
-    % q0 = func(a);
-    % q1 = func(b);
     p = b - q1*(b - a)/(q1-q0);
     anew = b;
     bnew = p;

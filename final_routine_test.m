@@ -29,6 +29,7 @@ for j = 1:ntest
     %%%%
     [root, info] = modifiedzeroin3037680414(func, Int, params);
     profile off
+    % disp(info)
     % Verify root
     if ~isnan(root)
         root_tol_check = abs(root - fzero(func, root)) < params.root_tol;
